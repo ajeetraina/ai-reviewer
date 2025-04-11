@@ -12,6 +12,49 @@ This system processes user comments through a workflow that:
 4. **Identifies** potential product features based on comment content
 5. **Generates** polite responses for each comment
 
+## Tech Stack
+
+- **Runtime**: Node.js (ES Modules)
+- **AI Models**: 
+  - Gemma3 (via Docker Model Runner) - For text generation and processing
+  - MxbAI-Embed-Large - For text embeddings and clustering
+- **Dependencies**:
+  - OpenAI SDK (v4.90.0) - Used for API interface to the Docker Model Runner
+- **Environment**:
+  - Docker Desktop with Model Runner extension
+
+## Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph Input
+        A[User Comments] --> B[Generator]
+        B --> C[comments.json]
+    end
+    
+    subgraph Processor
+        C --> D[Categorizer]
+        D --> E[Clusterer]
+        E --> F[Feature Identifier]
+        F --> G[Response Generator]
+    end
+    
+    subgraph Models
+        H[Gemma3 Model] --- D & B & F & G
+        I[MxbAI-Embed Model] --- E
+    end
+    
+    subgraph Output
+        G --> J[results.json]
+        J --> K[Display Summary]
+    end
+    
+    style Processor fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style Models fill:#e1f5fe,stroke:#333,stroke-width:1px
+    style Input fill:#e8f5e9,stroke:#333,stroke-width:1px
+    style Output fill:#fff8e1,stroke:#333,stroke-width:1px
+```
+
 ## Project Structure
 
 ```
@@ -102,6 +145,33 @@ The system uses Gemma3 to generate synthetic user comments about Jarvis, focusin
 2. **Clustering**: Implements embedding-based clustering to group similar comments together, even if they belong to different categories.
 3. **Feature Identification**: Extracts potential feature requests or improvements from comment clusters using Gemma3.
 4. **Response Generation**: Creates contextually appropriate, polite responses for each comment.
+
+## Data Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Generator
+    participant C as Categorizer
+    participant CL as Clusterer
+    participant F as Feature Identifier
+    participant R as Response Generator
+    participant S as Summary
+    
+    U->>G: Start Process
+    G->>G: Generate/Load Comments
+    G->>C: Pass Comments
+    C->>C: Analyze Sentiment
+    C->>CL: Pass Categorized Comments
+    CL->>CL: Create Embeddings
+    CL->>CL: Cluster Similar Comments
+    CL->>F: Pass Clustered Comments
+    F->>F: Identify Features
+    F->>R: Pass Features & Comments
+    R->>R: Generate Responses
+    R->>S: Complete Processing
+    S->>U: Display Results
+```
 
 ## Example Output
 
